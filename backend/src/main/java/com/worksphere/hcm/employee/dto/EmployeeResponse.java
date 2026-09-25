@@ -1,0 +1,39 @@
+package com.worksphere.hcm.employee.dto;
+
+import com.worksphere.hcm.employee.entity.EmployeeStatus;
+import com.worksphere.hcm.employee.entity.EmploymentType;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Instant;
+
+public record EmployeeResponse(
+    String id,
+    String employeeCode,
+    String firstName,
+    String lastName,
+    String fullName,
+    String email,
+    String phone,
+    LocalDate dateOfBirth,
+    LocalDate dateOfJoining,
+    String departmentId,
+    String departmentName,
+    String managerId,
+    String managerName,
+    String jobTitle,
+    String level,
+    EmploymentType employmentType,
+    String locationId,
+    String locationName,
+    EmployeeStatus status,
+    String avatarUrl,
+    String bankAccountReference,
+    String ifscCode,
+    String panNumber,
+    String uanNumber,
+    BigDecimal ctcAnnual,
+    BigDecimal baseMonthly,
+    Long version,
+    Instant createdAt,
+    Instant updatedAt
+) {}

@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+:root {
+  --sidebar-width: 296px;
+  --sidebar-collapsed-width: 72px;
+  --header-height: 64px;
+  --content-padding-x: 2rem;
+  --content-padding-y: 1.5rem;
+}
+
+@theme {
+  --color-primary: #0037b0;
+  --color-primary-container: #1d4ed8;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #cad3ff;
+  --color-primary-fixed: #dce1ff;
+  --color-primary-fixed-dim: #b7c4ff;
+  
+  --color-secondary: #565e74;
+  --color-secondary-container: #dae2fd;
+  --color-secondary-fixed: #dae2fd;
+  --color-secondary-fixed-dim: #bec6e0;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #5c647a;
+  
+  --color-tertiary: #004f35;
+  --color-tertiary-container: #006a48;
+  --color-tertiary-fixed: #6ffbbe;
+  --color-tertiary-fixed-dim: #4edea3;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-fixed: #002113;
+  
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+  
+  --color-background: #f8f9ff;
+  --color-surface: #f8f9ff;
+  --color-surface-dim: #cbdbf5;
+  --color-surface-bright: #f8f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff4ff;
+  --color-surface-container: #e5eeff;
+  --color-surface-container-high: #dce9ff;
+  --color-surface-container-highest: #d3e4fe;
+  --color-surface-variant: #d3e4fe;
+  --color-surface-tint: #2151da;
+  --color-on-surface: #0b1c30;
+  --color-on-surface-variant: #434655;
+  --color-inverse-surface: #213145;
+  --color-inverse-on-surface: #eaf1ff;
+  --color-outline: #747686;
+  --color-outline-variant: #c4c5d7;
+
+  --font-headline-lg: 'Inter', sans-serif;
+  --font-code-sm: 'JetBrains Mono', monospace;
+}
+
+@layer utilities {
+  .font-display-lg {
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    line-height: 40px;
+    letter-spacing: -0.02em;
+  }
+  .font-headline-lg {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    line-height: 32px;
+    letter-spacing: -0.015em;
+  }
+  .font-headline-md {
+    font-family: 'Inter', sans-serif;
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: -0.01em;
+  }
+  .font-headline-sm {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.005em;
+  }
+  .font-body-lg {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .font-body-md {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .font-body-sm {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .font-body-xs {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+  }
+  .font-label-md {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .font-label-sm {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.02em;
+  }
+  .font-label-xs {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    line-height: 14px;
+    letter-spacing: 0.04em;
+  }
+  .font-code-sm {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 16px;
+  }
+  
+  .px-gutter-desktop {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  .p-space-base {
+    padding: 1rem;
+  }
+  .p-space-lg {
+    padding: 1.5rem;
+  }
+  .p-space-md {
+    padding: 0.75rem;
+  }
+  .p-space-sm {
+    padding: 0.5rem;
+  }
+  .p-space-xs {
+    padding: 0.25rem;
+  }
+  .px-space-base {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .px-space-md {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  .px-space-sm {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .px-space-xs {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+  .py-space-base {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  .py-space-lg {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+  .py-space-md {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  .py-space-sm {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .py-space-xs {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+  .gap-space-base {
+    gap: 1rem;
+  }
+  .gap-space-lg {
+    gap: 1.5rem;
+  }
+  .gap-space-md {
+    gap: 0.75rem;
+  }
+  .gap-space-sm {
+    gap: 0.5rem;
+  }
+  .gap-space-xs {
+    gap: 0.25rem;
+  }
+  .gap-space-2xs {
+    gap: 0.125rem;
+  }
+  .mb-space-lg {
+    margin-bottom: 1.5rem;
+  }
+  .mb-space-base {
+    margin-bottom: 1rem;
+  }
+  .mb-space-md {
+    margin-bottom: 0.75rem;
+  }
+  .mb-space-sm {
+    margin-bottom: 0.5rem;
+  }
+  .mt-space-md {
+    margin-top: 0.75rem;
+  }
+  .mt-space-sm {
+    margin-top: 0.5rem;
+  }
+  .mt-space-xs {
+    margin-top: 0.25rem;
+  }
+  .mt-space-2xs {
+    margin-top: 0.125rem;
+  }
+  .pt-space-xs {
+    padding-top: 0.25rem;
+  }
+  .pt-space-base {
+    padding-top: 1rem;
+  }
+}
+
+/* Print Styles for Enterprise Payslip */
+@media print {
+  aside, header, #sidebar, #top-header, .no-print {
+    display: none !important;
+  }
+  main, .print-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+  .print-page {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+}
