@@ -22,15 +22,17 @@ export const RegularizationModal: React.FC<RegularizationModalProps> = ({
   const [category, setCategory] = useState('Gate Scanner Discrepancy');
   const [proposedTime, setProposedTime] = useState('09:00 AM');
   const [reason, setReason] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const empName = defaultEmpName || currentUser?.fullName || 'Vikram Malhotra';
-  const empCode = defaultEmpCode || currentUser?.employeeId || 'EMP-00108';
+  const empName = defaultEmpName || currentUser?.fullName || 'Personnel';
+  const empCode = defaultEmpCode || currentUser?.employeeId || 'EMP-001';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     try {
       setIsSubmitting(true);
       await attendanceApi.createRegularization({
@@ -44,7 +46,7 @@ export const RegularizationModal: React.FC<RegularizationModalProps> = ({
       onSuccess?.();
       onClose();
     } catch (err: any) {
-      alert(err.message || 'Failed to file regularization request.');
+      setErrorMsg(err.message || 'Failed to file regularization request.');
     } finally {
       setIsSubmitting(false);
     }
@@ -68,6 +70,13 @@ export const RegularizationModal: React.FC<RegularizationModalProps> = ({
             <span className="material-symbols-outlined text-base">close</span>
           </button>
         </div>
+
+        {errorMsg && (
+          <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-xs font-medium flex items-center gap-2">
+            <span className="material-symbols-outlined text-base">error</span>
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-space-sm font-body-sm text-body-sm">
           <div>

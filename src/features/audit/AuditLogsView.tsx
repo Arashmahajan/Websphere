@@ -10,7 +10,7 @@ export const AuditLogsView: React.FC = () => {
   useEffect(() => {
     auditApi
       .getLogs()
-      .then((res) => setLogs(res.logs))
+      .then((res: any) => setLogs(res?.logs || []))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -40,7 +40,7 @@ export const AuditLogsView: React.FC = () => {
 
         <div className="flex items-center gap-space-xs">
           <button
-            onClick={() => alert('Full SHA-256 encrypted ledger stream exported.')}
+            onClick={() => console.info('Full SHA-256 encrypted ledger stream exported.')}
             className="flex items-center gap-space-xs h-9 px-space-md bg-surface-container-lowest text-on-surface hover:bg-surface-container-high rounded font-label-sm text-sm border border-slate-200 shadow-sm cursor-pointer"
             type="button"
           >

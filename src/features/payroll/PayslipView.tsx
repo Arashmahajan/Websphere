@@ -21,10 +21,13 @@ export const PayslipView: React.FC<PayslipViewProps> = ({
     setLoading(true);
     payrollApi
       .getPayslip(currentEmpCode)
-      .then((res) => {
-        setPayslip(res.payslip);
+      .then((res: any) => {
+        setPayslip(res?.payslip || null);
       })
-      .catch(console.error)
+      .catch((err: any) => {
+        console.error(err);
+        setPayslip(null);
+      })
       .finally(() => setLoading(false));
   }, [currentEmpCode]);
 
@@ -32,7 +35,7 @@ export const PayslipView: React.FC<PayslipViewProps> = ({
     window.print();
   };
 
-  if (loading || !payslip) {
+  if (loading) {
     return (
       <div className="py-20 flex flex-col items-center justify-center gap-3">
         <span className="material-symbols-outlined text-4xl text-primary animate-spin">
@@ -41,6 +44,34 @@ export const PayslipView: React.FC<PayslipViewProps> = ({
         <span className="font-label-sm text-sm text-secondary">
           Compiling official compensation ledger statement...
         </span>
+      </div>
+    );
+  }
+
+  if (!payslip) {
+    return (
+      <div className="flex flex-col gap-6 w-full animate-in fade-in duration-200">
+        <div className="no-print flex items-center gap-2">
+          {onBackToPayroll && (
+            <button
+              onClick={onBackToPayroll}
+              className="p-2 rounded-lg text-secondary hover:bg-surface-container hover:text-on-surface cursor-pointer flex items-center gap-1 text-xs font-semibold"
+            >
+              <span className="material-symbols-outlined text-base">arrow_back</span>
+              <span>Back to Payroll</span>
+            </button>
+          )}
+        </div>
+
+        <div className="py-16 text-center bg-surface-container-lowest border border-outline-variant/60 rounded-2xl shadow-xs flex flex-col items-center justify-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+            <span className="material-symbols-outlined text-2xl">receipt_long</span>
+          </div>
+          <h3 className="font-bold text-base text-on-surface">No Payslips Generated</h3>
+          <p className="text-xs text-secondary max-w-sm">
+            No official payslips have been generated or disbursed yet. Complete a payroll cycle to disburse employee salary statements.
+          </p>
+        </div>
       </div>
     );
   }

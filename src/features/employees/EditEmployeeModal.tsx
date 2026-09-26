@@ -136,7 +136,10 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({
       onSuccess(res.employee || res.data || (res as any));
       onClose();
     } catch (err: any) {
-      if (err.code === 'EMPLOYEE_MODIFIED_BY_ANOTHER_USER' || err.status === 409) {
+      if (err?.fieldErrors && Object.keys(err.fieldErrors).length > 0) {
+        setValidationErrors((prev) => ({ ...prev, ...err.fieldErrors }));
+        setServerError(err.message || 'Please correct the validation errors below.');
+      } else if (err.code === 'EMPLOYEE_MODIFIED_BY_ANOTHER_USER' || err.status === 409) {
         setServerError('This employee record was modified by another user. Please refresh and try again.');
       } else {
         setServerError(err.message || 'Failed to update employee record. Check network or server status.');

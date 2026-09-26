@@ -85,6 +85,7 @@ export function useCreateEmployee() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (newEmployeeData: Partial<Employee>) => employeeApi.createEmployee(newEmployeeData),
+    retry: false, // Do not auto-retry non-idempotent creations
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       queryClient.invalidateQueries({ queryKey: ['managers'] });
@@ -97,6 +98,7 @@ export function useUpdateEmployee() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Employee> }) =>
       employeeApi.updateEmployee(id, data),
+    retry: false,
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       queryClient.invalidateQueries({ queryKey: ['employee', variables.id] });
@@ -110,6 +112,7 @@ export function useChangeEmployeeStatus() {
   return useMutation({
     mutationFn: ({ id, status, version, reason }: { id: string; status: EmployeeStatus; version?: number; reason?: string }) =>
       employeeApi.changeStatus(id, status, version, reason),
+    retry: false,
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       queryClient.invalidateQueries({ queryKey: ['employee', variables.id] });

@@ -29,6 +29,9 @@ public class Location {
     @Column(name = "address", columnDefinition = "TEXT")
     private String address;
 
+    @Column(name = "organization_id", length = 64)
+    private String organizationId;
+
     @Column(name = "created_at")
     private Instant createdAt = Instant.now();
 
@@ -47,6 +50,8 @@ public class Location {
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+    public String getOrganizationId() { return organizationId; }
+    public void setOrganizationId(String organizationId) { this.organizationId = organizationId; }
     public String getCode() { return code; }
     public void setCode(String code) { this.code = code; }
     public String getName() { return name; }

@@ -56,6 +56,8 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
         leaveType,
         startDate,
         endDate,
+        duration: daysCount,
+        durationDays: daysCount,
         reason,
       });
       onSuccess();

@@ -19,12 +19,12 @@ export const AIPayrollAssistantModal: React.FC<AIPayrollAssistantModalProps> = (
       setLoading(true);
       setError(null);
       payrollApi
-        .getAiAdvice()
-        .then((res) => {
-          setData(res.result);
+        .getAiAdvice('Analyze current payroll cycle health')
+        .then((res: any) => {
+          setData(res.result || res.response);
         })
-        .catch((err) => {
-          setError(err.message || 'AI service temporarily unavailable.');
+        .catch((err: any) => {
+          setError(err?.message || 'AI service temporarily unavailable.');
         })
         .finally(() => {
           setLoading(false);

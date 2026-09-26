@@ -1,19 +1,29 @@
 version: '3.8'
 
+# ==============================================================================
+# WorkSphere Enterprise HCM: Local Infrastructure & Persistence Services
+# PostgreSQL 16 (Relational DB & Flyway Migrations), Redis 7 (Cache/Sessions),
+# Apache Kafka (Domain Event Streaming)
+#
+# NOTICE: Credentials configured below are strictly for LOCAL DEVELOPMENT.
+# MUST BE CHANGED FOR STAGING AND PRODUCTION DEPLOYMENTS!
+# ==============================================================================
+
 services:
   postgres:
     image: postgres:16-alpine
     container_name: worksphere-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: worksphere
-      POSTGRES_USER: worksphere_app
-      POSTGRES_PASSWORD: enterprise_secure_pwd_2026
+      POSTGRES_USER: worksphere
+      POSTGRES_PASSWORD: worksphere_dev_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U worksphere_app -d worksphere"]
+      test: ["CMD-SHELL", "pg_isready -U worksphere -d worksphere"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -21,8 +31,12 @@ services:
   redis:
     image: redis:7.2-alpine
     container_name: worksphere-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -32,33 +46,45 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: worksphere-zookeeper
+    restart: unless-stopped
+    # Zookeeper internal port 2181 is NOT exposed to the host to adhere to minimal port exposure rule
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: worksphere-kafka
+    restart: unless-stopped
     depends_on:
       - zookeeper
     ports:
       - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: worksphere-app
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://worksphere_app:enterprise_secure_pwd_2026@postgres:5432/worksphere
+      DATABASE_URL: postgresql://worksphere:worksphere_dev_password@postgres:5432/worksphere
+      DATABASE_USERNAME: worksphere
+      DATABASE_PASSWORD: worksphere_dev_password
       REDIS_URL: redis://redis:6379
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
@@ -69,3 +95,10 @@ services:
 
 volumes:
   postgres_data:
+    name: worksphere_postgres_data
+  redis_data:
+    name: worksphere_redis_data
+  zookeeper_data:
+    name: worksphere_zookeeper_data
+  kafka_data:
+    name: worksphere_kafka_data

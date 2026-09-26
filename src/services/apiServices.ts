@@ -1,6 +1,9 @@
 import { apiClient } from './apiClient.ts';
 import {
   User,
+  Organization,
+  Department,
+  Location,
   Employee,
   AttendanceRecord,
   RegularizationRequest,
@@ -15,8 +18,70 @@ import {
   DashboardMetrics,
 } from '../types/index.ts';
 
+export const setupApi = {
+  getStatus: () =>
+    apiClient.get<{ initialized: boolean; organizationCount: number; userCount: number }>('/api/v1/setup/status'),
+  initialize: (data: {
+    organization: {
+      organizationCode: string;
+      name: string;
+      legalName: string;
+      industry?: string;
+      country: string;
+      timezone: string;
+      primaryEmail: string;
+      phone?: string;
+      addressLine1?: string;
+      addressLine2?: string;
+      city?: string;
+      state?: string;
+      postalCode?: string;
+      website?: string;
+    };
+    administrator: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      password?: string;
+    };
+  }) =>
+    apiClient.post<{
+      success: boolean;
+      message: string;
+      organization: Organization;
+      adminEmail: string;
+      adminFullName: string;
+      token?: string;
+      user?: User;
+    }>('/api/v1/setup/initialize', data),
+};
+
+export const organizationApi = {
+  getOrganizations: () => apiClient.get<Organization[]>('/api/v1/organizations'),
+  getOrganizationById: (id: string) => apiClient.get<Organization>(`/api/v1/organizations/${id}`),
+  createOrganization: (data: Partial<Organization>) => apiClient.post<Organization>('/api/v1/organizations', data),
+  updateOrganization: (id: string, data: Partial<Organization>) => apiClient.put<Organization>(`/api/v1/organizations/${id}`, data),
+  changeStatus: (id: string, status: string) => apiClient.patch<Organization>(`/api/v1/organizations/${id}/status`, { status }),
+};
+
+export const departmentApi = {
+  getDepartments: (organizationId?: string) => {
+    const q = organizationId ? `?organizationId=${organizationId}` : '';
+    return apiClient.get<{ data: Department[] }>(`/api/v1/departments${q}`);
+  },
+  createDepartment: (data: Partial<Department>) => apiClient.post<{ data: Department }>('/api/v1/departments', data),
+};
+
+export const locationApi = {
+  getLocations: (organizationId?: string) => {
+    const q = organizationId ? `?organizationId=${organizationId}` : '';
+    return apiClient.get<{ data: Location[] }>(`/api/v1/locations${q}`);
+  },
+  createLocation: (data: Partial<Location>) => apiClient.post<{ data: Location }>('/api/v1/locations', data),
+};
+
 export const authApi = {
-  getMe: () => apiClient.get<{ user: User }>('/api/v1/auth/me'),
+  getMe: () => apiClient.get<{ user: User | null }>('/api/v1/auth/me'),
   getUsers: () => apiClient.get<{ users: User[] }>('/api/v1/auth/users'),
   switchUser: (email: string) => apiClient.post<{ success: boolean; user: User; token?: string }>('/api/v1/auth/switch-user', { email }),
   login: (email: string, password?: string) =>
@@ -43,6 +108,7 @@ export const employeeApi = {
     limit?: number;
     sort?: string;
     direction?: string;
+    organizationId?: string;
   }) => {
     const query = new URLSearchParams();
     if (params?.search) query.set('search', params.search);
@@ -52,7 +118,8 @@ export const employeeApi = {
     if (params?.locationId) query.set('locationId', params.locationId);
     else if (params?.location) query.set('location', params.location);
     if (params?.employmentType) query.set('employmentType', params.employmentType);
-    else if (params?.contract) query.set('contract', params.contract);
+    if (params?.contract) query.set('contract', params.contract);
+    if (params?.organizationId) query.set('organizationId', params.organizationId);
     if (params?.page !== undefined) query.set('page', params.page.toString());
     if (params?.size !== undefined) query.set('size', params.size.toString());
     else if (params?.limit !== undefined) query.set('limit', params.limit.toString());
@@ -77,8 +144,8 @@ export const employeeApi = {
     apiClient.put<{ employee: Employee; data: Employee }>(`/api/v1/employees/${id}`, data),
   changeStatus: (id: string, status: string, version?: number, reason?: string) =>
     apiClient.patch<{ employee: Employee; data: Employee }>(`/api/v1/employees/${id}/status`, { status, version, reason }),
-  getDepartments: () => apiClient.get<{ data: Array<{ id: string; code: string; name: string; headcountTarget?: number }> }>('/api/v1/departments'),
-  getLocations: () => apiClient.get<{ data: Array<{ id: string; code: string; name: string; city: string; state: string; country: string }> }>('/api/v1/locations'),
+  getDepartments: () => apiClient.get<{ data: Department[] }>('/api/v1/departments'),
+  getLocations: () => apiClient.get<{ data: Location[] }>('/api/v1/locations'),
   getManagers: () => apiClient.get<{ data: Employee[]; managers?: Employee[] }>('/api/v1/employees/managers'),
 };
 
@@ -86,71 +153,76 @@ export const attendanceApi = {
   getAttendance: () =>
     apiClient.get<{
       records: AttendanceRecord[];
-      userSession: {
-        active: boolean;
-        checkInTime: string;
-        shift: string;
-        location: string;
-        onBreak: boolean;
-        breakCount: number;
-        remoteLogged: boolean;
-      };
-      totalRecords: number;
+      userSession?: any;
+      currentUserSession?: any;
+      totalRecords?: number;
     }>('/api/v1/attendance'),
   punchIn: () => apiClient.post<{ success: boolean; session: any }>('/api/v1/attendance/punch-in'),
-  punchOut: () => apiClient.post<{ success: boolean; message: string }>('/api/v1/attendance/punch-out'),
+  punchOut: () => apiClient.post<{ success: boolean; session: any }>('/api/v1/attendance/punch-out'),
   toggleBreak: () => apiClient.post<{ success: boolean; session: any }>('/api/v1/attendance/toggle-break'),
   getRegularizations: () => apiClient.get<{ regularizations: RegularizationRequest[] }>('/api/v1/attendance/regularizations'),
-  createRegularization: (data: {
-    employeeName?: string;
-    employeeCode?: string;
-    incidentDate: string;
-    category: string;
-    proposedTime: string;
-    reason: string;
-  }) => apiClient.post<{ regularization: RegularizationRequest }>('/api/v1/attendance/regularize', data),
+  createRegularization: (data: Partial<RegularizationRequest>) =>
+    apiClient.post<{ success: boolean; request: RegularizationRequest; regularization?: RegularizationRequest }>('/api/v1/attendance/regularize', data),
+  requestRegularization: (data: Partial<RegularizationRequest>) =>
+    apiClient.post<{ success: boolean; request: RegularizationRequest; regularization?: RegularizationRequest }>('/api/v1/attendance/regularize', data),
   actionRegularization: (id: string, action: 'APPROVE' | 'REJECT') =>
-    apiClient.post<{ regularization: RegularizationRequest }>(`/api/v1/attendance/regularizations/${id}/action`, { action }),
+    apiClient.post<{ success: boolean; request: RegularizationRequest }>(`/api/v1/attendance/regularizations/${id}/action`, { action }),
 };
 
 export const leaveApi = {
-  getLeaves: () => apiClient.get<{ requests: LeaveRequest[]; balances: LeaveBalance[] }>('/api/v1/leave/requests'),
-  applyLeave: (data: { leaveType: string; startDate: string; endDate: string; reason: string }) =>
-    apiClient.post<{ request: LeaveRequest; balances: LeaveBalance[] }>('/api/v1/leave/requests', data),
+  getLeaves: () =>
+    apiClient.get<{ requests: LeaveRequest[]; balances: LeaveBalance[] }>('/api/v1/leave/requests'),
+  getBalances: () => apiClient.get<{ balances: LeaveBalance[] }>('/api/v1/leave/requests'),
+  getRequests: () => apiClient.get<{ requests: LeaveRequest[] }>('/api/v1/leave/requests'),
+  applyLeave: (data: { leaveType: string; startDate: string; endDate: string; duration?: number; durationDays?: number; reason: string }) =>
+    apiClient.post<{ success: boolean; request: LeaveRequest }>('/api/v1/leave/requests', data),
+  reviewLeave: (id: string, action: 'APPROVE' | 'REJECT', comments?: string) =>
+    apiClient.post<{ success: boolean; request: LeaveRequest }>(`/api/v1/leave/${id}/review`, { action, comments }),
 };
 
 export const payrollApi = {
-  getRuns: () => apiClient.get<{ currentRun: PayrollRun; exceptions: PayrollException[] }>('/api/v1/payroll/runs'),
-  revalidate: (id: string) => apiClient.post<{ success: boolean; message: string; currentRun: PayrollRun; exceptions: PayrollException[] }>(`/api/v1/payroll/runs/${id}/revalidate`),
-  resolveException: (runId: string, excId: string) =>
-    apiClient.post<{ success: boolean; exception: PayrollException; currentRun: PayrollRun }>(`/api/v1/payroll/runs/${runId}/exceptions/${excId}/resolve`),
-  approveRun: (id: string) => apiClient.post<{ success: boolean; currentRun: PayrollRun }>(`/api/v1/payroll/runs/${id}/approve`),
-  getPayslip: (empCode: string) => apiClient.get<{ payslip: Payslip }>(`/api/v1/payroll/payslips/${empCode}`),
-  getAiAdvice: () => apiClient.post<{ result: any }>('/api/v1/ai/payroll-assistant'),
+  getRuns: () =>
+    apiClient.get<{ currentRun: PayrollRun | null; runs: PayrollRun[]; exceptions: PayrollException[] }>('/api/v1/payroll/runs'),
+  getExceptions: (runId?: string) => {
+    const q = runId ? `?runId=${runId}` : '';
+    return apiClient.get<{ exceptions: PayrollException[] }>(`/api/v1/payroll/exceptions${q}`);
+  },
+  resolveException: (id: string, action: string, notes?: string) =>
+    apiClient.post<{ success: boolean; exception: PayrollException }>(`/api/v1/payroll/runs/pr-default/exceptions/${id}/resolve`, { action, notes }),
+  startRun: (period: string) => apiClient.post<{ success: boolean; run: PayrollRun }>('/api/v1/payroll/start-run', { period }),
+  approveRun: (id: string) => apiClient.post<{ success: boolean; run: PayrollRun }>(`/api/v1/payroll/runs/${id}/approve`),
+  revalidate: (id: string) => apiClient.post<{ success: boolean; run: PayrollRun }>(`/api/v1/payroll/runs/${id}/revalidate`),
+  getPayslip: (empCode: string) => apiClient.get<{ payslip: Payslip | null }>(`/api/v1/payroll/payslips/${empCode}`),
+  getAiAdvice: (prompt: string) => apiClient.post<{ response: string }>('/api/v1/ai/payroll-assistant', { prompt }),
+};
+
+export const payslipApi = {
+  getPayslips: () => apiClient.get<{ payslips: Payslip[] }>('/api/v1/payslips'),
+  getPayslipById: (id: string) => apiClient.get<{ payslip: Payslip }>(`/api/v1/payslips/${id}`),
 };
 
 export const approvalApi = {
   getApprovals: () => apiClient.get<{ items: ApprovalItem[] }>('/api/v1/approvals'),
-  actionApproval: (id: string, action: 'APPROVE' | 'REJECT' | 'REQUEST_CHANGES', comments?: string) =>
-    apiClient.post<{ item: ApprovalItem }>(`/api/v1/approvals/${id}/action`, { action, comments }),
-};
-
-export const reportApi = {
-  getReport: (type: string) =>
-    apiClient.get<{
-      reportType: string;
-      generatedAt: string;
-      filterSummary: any;
-      departmentBreakdown: Array<{ name: string; headcount: number; present: number; rate: string; leave: number; remote: number; status: string }>;
-    }>(`/api/v1/reports/${type}`),
+  getPendingApprovals: () => apiClient.get<{ items: ApprovalItem[] }>('/api/v1/approvals'),
+  actionApproval: (id: string, action: 'APPROVE' | 'REJECT', comments?: string) =>
+    apiClient.post<{ success: boolean; item: ApprovalItem }>(`/api/v1/approvals/${id}/action`, { action, comments }),
+  takeAction: (id: string, action: 'APPROVE' | 'REJECT', comments?: string) =>
+    apiClient.post<{ success: boolean; item: ApprovalItem }>(`/api/v1/approvals/${id}/action`, { action, comments }),
 };
 
 export const auditApi = {
   getLogs: () => apiClient.get<{ logs: AuditLog[] }>('/api/v1/audit-logs'),
+  getAuditLogs: () => apiClient.get<{ logs: AuditLog[] }>('/api/v1/audit-logs'),
 };
 
 export const notificationApi = {
   getNotifications: () => apiClient.get<{ notifications: NotificationItem[] }>('/api/v1/notifications'),
-  markRead: (id: string) => apiClient.post<{ success: boolean; notification: NotificationItem }>(`/api/v1/notifications/${id}/read`),
+  markAsRead: (id: string) => apiClient.post<{ success: boolean }>(`/api/v1/notifications/${id}/read`),
   markAllRead: () => apiClient.post<{ success: boolean; notifications: NotificationItem[] }>('/api/v1/notifications/read-all'),
+  markAllAsRead: () => apiClient.post<{ success: boolean; notifications: NotificationItem[] }>('/api/v1/notifications/read-all'),
+};
+
+export const reportApi = {
+  getReport: (type: string) => apiClient.get<any>(`/api/v1/reports/${type}`),
+  getReportData: (type: string) => apiClient.get<any>(`/api/v1/reports/${type}`),
 };

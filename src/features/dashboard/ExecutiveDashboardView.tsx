@@ -54,6 +54,39 @@ export const ExecutiveDashboardView: React.FC<ExecutiveDashboardViewProps> = ({
         </div>
       )}
 
+      {/* Fresh Installation Guide when 0 employees */}
+      {metrics.totalEmployees === 0 && (
+        <div className="mb-6 p-4 rounded-2xl bg-blue-50/80 border border-blue-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <span className="material-symbols-outlined text-xl">domain_add</span>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">Fresh Enterprise Installation · Zero Dummy Data</h3>
+              <p className="text-xs text-slate-600 mt-0.5">
+                The database currently holds 0 business records. Configure your organizations, departments, locations, and employees manually to test end-to-end HCM persistence.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => onNavigateTab('organization')}
+              className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
+            >
+              Manage Organizations
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigateTab('employees')}
+              className="px-3 py-1.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              Add Employee
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <section className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-md mb-space-lg">
         <div className="flex flex-col gap-space-2xs">
@@ -70,7 +103,7 @@ export const ExecutiveDashboardView: React.FC<ExecutiveDashboardViewProps> = ({
             Executive Operations & HR Dashboard
           </h1>
           <p className="font-body-md text-body-md text-secondary max-w-3xl">
-            Real-time workforce metrics, payroll cycle tracking, and compliance monitoring across 10,248 active personnel.
+            Real-time workforce metrics, payroll cycle tracking, and compliance monitoring across {metrics.totalEmployees} personnel in database.
           </p>
         </div>
 
@@ -84,7 +117,7 @@ export const ExecutiveDashboardView: React.FC<ExecutiveDashboardViewProps> = ({
             <span className="material-symbols-outlined text-secondary text-sm">arrow_drop_down</span>
           </div>
           <button
-            onClick={() => alert('Workforce Summary Export generated (CSV/PDF packet ready).')}
+            onClick={() => console.info('Workforce Summary Export generated.')}
             className="flex items-center gap-space-xs bg-surface-container-lowest px-space-sm py-1.5 rounded shadow-sm text-secondary hover:text-on-surface transition-colors border border-slate-200 cursor-pointer"
             type="button"
           >

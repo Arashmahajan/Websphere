@@ -10,7 +10,7 @@ export const ReportsView: React.FC = () => {
     setLoading(true);
     reportApi
       .getReport(reportType)
-      .then((res) => {
+      .then((res: any) => {
         setData(res);
       })
       .catch(console.error)
@@ -18,9 +18,9 @@ export const ReportsView: React.FC = () => {
   }, [reportType]);
 
   const handleExportCsv = () => {
-    if (!data) return;
+    if (!data || !data.departmentBreakdown) return;
     const headers = ['Department', 'Headcount', 'Present Today', 'Attendance Rate', 'On Leave', 'Remote', 'Status'];
-    const rows = data.departmentBreakdown.map((d: any) => [
+    const rows = (data.departmentBreakdown || []).map((d: any) => [
       d.name,
       d.headcount,
       d.present,

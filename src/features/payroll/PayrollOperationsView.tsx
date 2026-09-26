@@ -4,7 +4,7 @@ import { PayrollRun, PayrollException } from '../../types/index.ts';
 import { payrollApi } from '../../services/apiServices.ts';
 
 interface PayrollOperationsViewProps {
-  currentRun: PayrollRun;
+  currentRun: PayrollRun | null;
   exceptions: PayrollException[];
   onOpenAiAssistant: () => void;
   onRefresh: () => void;
@@ -28,15 +28,41 @@ export const PayrollOperationsView: React.FC<PayrollOperationsViewProps> = ({
   const canResolve = hasPermission('PAYROLL_EXCEPTION_RESOLVE');
   const canApprove = hasPermission('PAYROLL_APPROVE');
 
+  if (!currentRun) {
+    return (
+      <div className="flex flex-col gap-6 w-full animate-in fade-in duration-200">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-display-lg text-2xl font-bold text-on-surface">
+            Payroll Operations & Exception Resolution
+          </h1>
+          <p className="text-secondary text-sm">
+            Statutory deduction engines, exception clearing desks, and banking host-to-host settlement.
+          </p>
+        </div>
+
+        <div className="py-16 text-center bg-surface-container-lowest border border-outline-variant/60 rounded-2xl shadow-xs flex flex-col items-center justify-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+            <span className="material-symbols-outlined text-2xl">payments</span>
+          </div>
+          <h3 className="font-bold text-base text-on-surface">No Payroll Runs Initiated</h3>
+          <p className="text-xs text-secondary max-w-sm">
+            There are no active or scheduled payroll cycles in the database. When employees and attendance are logged, payroll runs will appear here for validation and disbursement.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const handleRevalidate = async () => {
     try {
       setIsRevalidating(true);
-      const res = await payrollApi.revalidate(currentRun.id);
-      setToastMessage(res.message);
+      const res: any = await payrollApi.revalidate(currentRun.id);
+      setToastMessage(res?.message || 'Payroll revalidated successfully.');
       onRefresh();
       setTimeout(() => setToastMessage(null), 5000);
     } catch (err: any) {
-      alert(err.message);
+      setToastMessage(err.message || 'Revalidation failed.');
+      setTimeout(() => setToastMessage(null), 4000);
     } finally {
       setIsRevalidating(false);
     }
@@ -49,7 +75,8 @@ export const PayrollOperationsView: React.FC<PayrollOperationsViewProps> = ({
       onRefresh();
       setTimeout(() => setToastMessage(null), 4000);
     } catch (err: any) {
-      alert(err.message);
+      setToastMessage(err.message || 'Failed to resolve exception.');
+      setTimeout(() => setToastMessage(null), 4000);
     }
   };
 
@@ -60,7 +87,8 @@ export const PayrollOperationsView: React.FC<PayrollOperationsViewProps> = ({
       onRefresh();
       setTimeout(() => setToastMessage(null), 5000);
     } catch (err: any) {
-      alert(err.message || 'Approval blocked.');
+      setToastMessage(err.message || 'Approval blocked.');
+      setTimeout(() => setToastMessage(null), 4000);
     }
   };
 
@@ -178,7 +206,10 @@ export const PayrollOperationsView: React.FC<PayrollOperationsViewProps> = ({
               <span>{isRevalidating ? 'Checking Rules...' : 'Run Auto-Revalidation'}</span>
             </button>
             <button
-              onClick={() => alert('Bank Disbursement file formatted for HDFC Host-to-Host (ISO 20022 XML packet).')}
+              onClick={() => {
+                setToastMessage('Bank Disbursement file formatted for HDFC Host-to-Host (ISO 20022 XML packet).');
+                setTimeout(() => setToastMessage(null), 4000);
+              }}
               className="flex items-center gap-space-xs h-9 px-space-md bg-surface-container-lowest text-on-surface rounded font-label-sm text-label-sm shadow-sm hover:bg-surface-container transition-all border border-slate-200 cursor-pointer"
               type="button"
             >
@@ -530,7 +561,10 @@ export const PayrollOperationsView: React.FC<PayrollOperationsViewProps> = ({
                 </div>
                 <button
                   type="button"
-                  onClick={() => alert('Bulk Resolution: Auto-reconcile low-variance tax anomalies initiated.')}
+                  onClick={() => {
+                    setToastMessage('Bulk Resolution: Auto-reconcile low-variance tax anomalies initiated.');
+                    setTimeout(() => setToastMessage(null), 4000);
+                  }}
                   className="h-8 px-2.5 bg-surface-container-low text-secondary rounded flex items-center gap-1 font-label-xs text-label-xs hover:bg-surface-container-high transition-all cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-sm">tune</span>
@@ -679,7 +713,10 @@ export const PayrollOperationsView: React.FC<PayrollOperationsViewProps> = ({
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => alert(`Exception held for ${exc.employeeName}. Payout routed to manual cheque buffer.`)}
+                                  onClick={() => {
+                                    setToastMessage(`Exception held for ${exc.employeeName}. Payout routed to manual cheque buffer.`);
+                                    setTimeout(() => setToastMessage(null), 4000);
+                                  }}
                                   className="h-7 px-2 bg-surface-container-low text-secondary rounded font-label-xs text-label-xs hover:bg-surface-container-high transition-colors cursor-pointer"
                                 >
                                   Hold

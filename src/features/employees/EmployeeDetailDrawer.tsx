@@ -41,17 +41,17 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
       setIsLoadingActivity(true);
       auditApi
         .getLogs()
-        .then((res) => {
-          const matching = (res.logs || []).filter(
-            (log) =>
+        .then((res: any) => {
+          const matching = (res?.logs || []).filter(
+            (log: any) =>
               log.resourceId === employee.employeeCode ||
               log.resourceId === employee.id ||
-              log.details.includes(employee.employeeCode) ||
-              log.details.includes(employee.firstName)
+              log.details?.includes(employee.employeeCode) ||
+              log.details?.includes(employee.firstName)
           );
           setActivityLogs(matching);
         })
-        .catch((err) => console.error('Failed to load employee activity', err))
+        .catch((err: any) => console.error('Failed to load employee activity', err))
         .finally(() => setIsLoadingActivity(false));
     }
   }, [employee, activeTab]);

@@ -23,6 +23,9 @@ public class Department {
     @Column(name = "headcount_target")
     private Integer headcountTarget = 0;
 
+    @Column(name = "organization_id", length = 64)
+    private String organizationId;
+
     @Column(name = "created_at")
     private Instant createdAt = Instant.now();
 
@@ -38,6 +41,8 @@ public class Department {
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+    public String getOrganizationId() { return organizationId; }
+    public void setOrganizationId(String organizationId) { this.organizationId = organizationId; }
     public String getCode() { return code; }
     public void setCode(String code) { this.code = code; }
     public String getName() { return name; }

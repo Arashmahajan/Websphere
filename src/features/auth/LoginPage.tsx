@@ -114,33 +114,46 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Demo Seeded Credentials */}
+        {/* User Accounts or Initial Setup */}
         <div className="pt-4 border-t border-slate-700/80 flex flex-col gap-2">
-          <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400">
-            Seeded RBAC Demo Accounts (1-Click Fill)
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            {availableUsers.map((u) => (
-              <button
-                key={u.email}
-                type="button"
-                onClick={() => handleSelectDemoAccount(u.email)}
-                className={`p-2 rounded-xl text-left border transition-all cursor-pointer flex flex-col ${
-                  email === u.email
-                    ? 'bg-blue-600/20 border-blue-500 text-blue-300'
-                    : 'bg-slate-900/50 border-slate-700/80 text-slate-400 hover:bg-slate-900 hover:text-slate-200'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold truncate text-white">{u.fullName}</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
-                    {u.role}
-                  </span>
-                </div>
-                <span className="text-[10px] text-slate-400 truncate mt-0.5">{u.email}</span>
-              </button>
-            ))}
-          </div>
+          {availableUsers.length > 0 ? (
+            <>
+              <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400">
+                Registered Enterprise Accounts
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {availableUsers.map((u) => (
+                  <button
+                    key={u.email}
+                    type="button"
+                    onClick={() => handleSelectDemoAccount(u.email)}
+                    className={`p-2 rounded-xl text-left border transition-all cursor-pointer flex flex-col ${
+                      email === u.email
+                        ? 'bg-blue-600/20 border-blue-500 text-blue-300'
+                        : 'bg-slate-900/50 border-slate-700/80 text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold truncate text-white">{u.fullName}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                        {u.role}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 truncate mt-0.5">{u.email}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-2 flex flex-col items-center gap-2">
+              <span className="text-xs text-slate-400">
+                No user accounts provisioned in database yet.
+              </span>
+              <span className="text-[11px] text-slate-500">
+                The primary System Administrator is created during initial organization onboarding.
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Footer info */}

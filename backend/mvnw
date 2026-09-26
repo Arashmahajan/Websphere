@@ -1,0 +1,48 @@
+#!/bin/sh
+# ----------------------------------------------------------------------------
+# Apache Maven Wrapper Executable for Unix
+# ----------------------------------------------------------------------------
+
+set -e
+
+[ -z "$MAVEN_PROJECTBASEDIR" ] && MAVEN_PROJECTBASEDIR="`find_maven_basedir "$@"`"
+PRG="$0"
+while [ -h "$PRG" ]; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+saveddir=`pwd`
+BASE_DIR=`dirname "$PRG"`
+cd "$BASE_DIR"
+BASE_DIR=`pwd`
+cd "$saveddir"
+
+. "$BASE_DIR/.mvn/wrapper/maven-wrapper.properties"
+
+WRAPPER_JAR="$BASE_DIR/.mvn/wrapper/maven-wrapper.jar"
+WRAPPER_LAUNCHER=org.apache.maven.wrapper.MavenWrapperMain
+
+# If mvn is on PATH and wrapper jar does not exist, use system mvn if available or download
+if command -v mvn >/dev/null 2>&1; then
+  exec mvn "$@"
+fi
+
+if [ -f "$WRAPPER_JAR" ]; then
+  exec java $MAVEN_OPTS -jar "$WRAPPER_JAR" "$@"
+fi
+
+echo "Maven or Maven Wrapper jar not found. Attempting to download maven wrapper..."
+which curl >/dev/null 2>&1 && curl -o "$WRAPPER_JAR" "https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar" || \
+which wget >/dev/null 2>&1 && wget -O "$WRAPPER_JAR" "https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar"
+
+if [ -f "$WRAPPER_JAR" ]; then
+  exec java $MAVEN_OPTS -jar "$WRAPPER_JAR" "$@"
+else
+  echo "Error: Could not locate or download maven wrapper jar. Please ensure java and maven are installed." >&2
+  exit 1
+fi

@@ -48,20 +48,20 @@ export const AttendanceOperationsView: React.FC<AttendanceOperationsViewProps> =
       setToastMessage(!onBreak ? 'Break status commenced. Biometric session paused.' : 'Break concluded. Active duty clock resumed.');
       setTimeout(() => setToastMessage(null), 4000);
     } catch (err: any) {
-      alert(err.message);
+      setToastMessage(err.message || 'Failed to toggle break status.');
+      setTimeout(() => setToastMessage(null), 4000);
     }
   };
 
   const handlePunchOut = async () => {
-    const ok = window.confirm('Confirm punch out for General Shift A? Your departure timestamp will be recorded.');
-    if (!ok) return;
     try {
       await attendanceApi.punchOut();
       setPunchedOut(true);
       setToastMessage('Punch-out recorded at Gate 4. Daily attendance submitted for supervisor validation.');
       setTimeout(() => setToastMessage(null), 5000);
     } catch (err: any) {
-      alert(err.message);
+      setToastMessage(err.message || 'Failed to record punch-out.');
+      setTimeout(() => setToastMessage(null), 4000);
     }
   };
 
@@ -78,7 +78,8 @@ export const AttendanceOperationsView: React.FC<AttendanceOperationsViewProps> =
       onRefresh();
       setTimeout(() => setToastMessage(null), 4000);
     } catch (err: any) {
-      alert(err.message);
+      setToastMessage(err.message || 'Failed to process regularization request.');
+      setTimeout(() => setToastMessage(null), 4000);
     }
   };
 
@@ -134,7 +135,10 @@ export const AttendanceOperationsView: React.FC<AttendanceOperationsViewProps> =
         {/* Quick Tool Actions */}
         <div className="flex flex-wrap items-center gap-space-xs">
           <button
-            onClick={() => alert('All 42 Biometric Gate nodes are live and synchronized.')}
+            onClick={() => {
+              setToastMessage('Biometric Gate nodes status: All campus nodes synchronized.');
+              setTimeout(() => setToastMessage(null), 4000);
+            }}
             className="group flex items-center gap-space-xs h-9 px-space-sm bg-surface-container-low hover:bg-surface-container text-on-surface rounded font-label-sm text-label-sm shadow-sm transition-all border border-slate-200 cursor-pointer"
             type="button"
           >
@@ -154,7 +158,10 @@ export const AttendanceOperationsView: React.FC<AttendanceOperationsViewProps> =
             <span>Request Regularization</span>
           </button>
           <button
-            onClick={() => alert('Attendance Pack exported (CSV / PDF Summary ready).')}
+            onClick={() => {
+              setToastMessage('Attendance Pack exported (CSV / PDF Summary ready).');
+              setTimeout(() => setToastMessage(null), 4000);
+            }}
             className="flex items-center gap-space-xs h-9 px-space-sm bg-primary text-on-primary hover:bg-primary-container rounded font-label-sm text-label-sm shadow-md transition-all cursor-pointer"
             type="button"
           >
@@ -587,7 +594,10 @@ export const AttendanceOperationsView: React.FC<AttendanceOperationsViewProps> =
                             </button>
                           ) : (
                             <button
-                              onClick={() => alert(`Device Audit Log: Captured by Turnstile Node #12 at 09:02:18 IST.`)}
+                              onClick={() => {
+                                setToastMessage(`Device Audit Log: Captured by Turnstile biometric node.`);
+                                setTimeout(() => setToastMessage(null), 4000);
+                              }}
                               className="p-1 rounded text-secondary hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
                               title="View Device Audit Logs"
                               type="button"

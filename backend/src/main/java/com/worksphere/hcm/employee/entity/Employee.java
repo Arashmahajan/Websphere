@@ -34,6 +34,9 @@ public class Employee {
     @Column(name = "date_of_joining", nullable = false)
     private LocalDate dateOfJoining;
 
+    @Column(name = "organization_id", length = 64)
+    private String organizationId;
+
     @Column(name = "department_id", length = 64)
     private String departmentId;
 
@@ -114,6 +117,9 @@ public class Employee {
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getOrganizationId() { return organizationId; }
+    public void setOrganizationId(String organizationId) { this.organizationId = organizationId; }
 
     public String getEmployeeCode() { return employeeCode; }
     public void setEmployeeCode(String employeeCode) { this.employeeCode = employeeCode; }

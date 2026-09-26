@@ -11,6 +11,7 @@ interface AuthContextType {
   login: (email: string, password?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   switchUser: (email: string) => Promise<void>;
+  setSessionUser: (user: User, token?: string) => void;
   refreshSession: () => Promise<void>;
   hasPermission: (permission: Permission) => boolean;
   hasRole: (role: Role | Role[]) => boolean;
@@ -23,18 +24,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const setSessionUser = (user: User, token?: string) => {
+    setCurrentUser(user);
+    if (token) {
+      tokenStorage.setToken(token);
+    }
+  };
+
   const initAuth = async () => {
-    try {
-      const [meRes, usersRes] = await Promise.all([authApi.getMe(), authApi.getUsers()]);
-      setCurrentUser(meRes.user);
-      setAvailableUsers(usersRes.users);
-      if (meRes.user && !tokenStorage.getToken()) {
-        // Seed initial session token for seamless refresh survival
-        tokenStorage.setToken(`jwt-session-${meRes.user.email}`);
-      }
-    } catch (err) {
-      console.error('Failed to load initial user context', err);
+    const token = tokenStorage.getToken();
+    if (!token) {
       setCurrentUser(null);
+      setAvailableUsers([]);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const [meRes, usersRes] = await Promise.all([
+        authApi.getMe().catch(() => null),
+        authApi.getUsers().catch(() => null),
+      ]);
+
+      if (meRes?.user) {
+        setCurrentUser(meRes.user);
+        setAvailableUsers(usersRes?.users || [meRes.user]);
+      } else {
+        tokenStorage.clearToken();
+        setCurrentUser(null);
+        setAvailableUsers([]);
+      }
+    } catch {
+      tokenStorage.clearToken();
+      setCurrentUser(null);
+      setAvailableUsers([]);
     } finally {
       setIsLoading(false);
     }
@@ -48,14 +71,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       const res = await authApi.login(email, password);
-      if (res.success && res.user) {
+      if (res?.success && res.user) {
         if (res.token) {
           tokenStorage.setToken(res.token);
         }
         setCurrentUser(res.user);
+        // Refresh users list
+        authApi.getUsers().then((u) => setAvailableUsers(u.users || [res.user])).catch(() => {});
         return { success: true };
       }
-      return { success: false, error: 'Invalid credentials' };
+      return { success: false, error: 'Invalid email or password' };
     } catch (err: any) {
       return { success: false, error: err.message || 'Authentication failed' };
     } finally {
@@ -66,12 +91,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       setIsLoading(true);
-      await authApi.logout();
-    } catch (err) {
-      console.warn('Logout API error:', err);
+      await authApi.logout().catch(() => {});
     } finally {
       tokenStorage.clearToken();
       setCurrentUser(null);
+      setAvailableUsers([]);
       setIsLoading(false);
     }
   };
@@ -80,14 +104,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       const res = await authApi.switchUser(email);
-      if (res.success) {
+      if (res?.success && res.user) {
         if (res.token) {
           tokenStorage.setToken(res.token);
         }
         setCurrentUser(res.user);
       }
     } catch (err) {
-      console.error('Failed to switch user role', err);
+      console.warn('Failed to switch user:', err);
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const hasPermission = (permission: Permission): boolean => {
     if (!currentUser) return false;
     if (currentUser.role === 'SYSTEM_ADMIN') return true;
-    return currentUser.permissions.includes(permission);
+    return currentUser.permissions?.includes(permission) ?? false;
   };
 
   const hasRole = (role: Role | Role[]): boolean => {
@@ -121,6 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         logout,
         switchUser,
+        setSessionUser,
         refreshSession,
         hasPermission,
         hasRole,

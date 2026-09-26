@@ -17,6 +17,14 @@ export const QuickActionModal: React.FC<QuickActionModalProps> = ({
 
   const actions = [
     {
+      id: 'create-org',
+      title: 'Create Organization',
+      desc: 'Provision a new corporate entity, subsidiary, or regional tenant',
+      icon: 'corporate_fare',
+      color: 'bg-primary text-on-primary',
+      permission: 'EMPLOYEE_WRITE' as const,
+    },
+    {
       id: 'punch',
       title: 'Clock In / Clock Out',
       desc: 'Log shift timestamp across enterprise turnstiles or mobile',

@@ -136,10 +136,15 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({
 
       onClose();
     } catch (err: any) {
-      if (err.status === 409 || err.code === 'DUPLICATE_EMAIL') {
+      if (err?.fieldErrors && Object.keys(err.fieldErrors).length > 0) {
+        setValidationErrors((prev) => ({ ...prev, ...err.fieldErrors }));
+        setErrorMsg(err.message || 'Please correct the validation errors below.');
+      } else if (err.status === 409 || err.code === 'DUPLICATE_EMAIL') {
         setErrorMsg('Duplicate corporate email: An employee with this email already exists.');
+        setValidationErrors((prev) => ({ ...prev, email: 'Email already exists' }));
       } else if (err.code === 'DUPLICATE_EMPLOYEE_CODE') {
         setErrorMsg('Duplicate Employee Code: This employee ID code is already taken.');
+        setValidationErrors((prev) => ({ ...prev, employeeCode: 'Employee code already exists' }));
       } else {
         setErrorMsg(err.message || 'Failed to onboard employee record.');
       }

@@ -1,5 +1,51 @@
 export type Role = 'EMPLOYEE' | 'MANAGER' | 'PAYROLL_ADMIN' | 'HR_ADMIN' | 'SYSTEM_ADMIN';
 
+export type OrganizationStatus = 'ACTIVE' | 'INACTIVE';
+
+export interface Organization {
+  id: string;
+  organizationCode: string;
+  name: string;
+  legalName: string;
+  industry?: string;
+  country: string;
+  timezone: string;
+  primaryEmail: string;
+  phone?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  website?: string;
+  status: OrganizationStatus;
+  version?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Department {
+  id: string;
+  code: string;
+  name: string;
+  headEmployeeId?: string;
+  headcountTarget?: number;
+  organizationId?: string;
+  createdAt?: string;
+}
+
+export interface Location {
+  id: string;
+  code: string;
+  name: string;
+  city: string;
+  state: string;
+  country: string;
+  address?: string;
+  organizationId?: string;
+  createdAt?: string;
+}
+
 export type Permission =
   | 'EMPLOYEE_READ'
   | 'EMPLOYEE_WRITE'
@@ -20,7 +66,8 @@ export type Permission =
   | 'REPORT_READ'
   | 'REPORT_EXPORT'
   | 'AUDIT_READ'
-  | 'USER_MANAGE';
+  | 'USER_MANAGE'
+  | 'ORGANIZATION_MANAGE';
 
 export interface User {
   id: string;
@@ -30,8 +77,9 @@ export interface User {
   permissions: Permission[];
   title: string;
   department: string;
-  avatarUrl: string;
-  employeeId: string;
+  avatarUrl?: string;
+  employeeId?: string;
+  organizationId?: string;
 }
 
 export type EmploymentType = 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERN';
@@ -46,6 +94,7 @@ export interface Employee {
   phone: string;
   dateOfBirth: string;
   dateOfJoining: string;
+  organizationId?: string;
   departmentId: string;
   departmentName: string;
   managerId: string;
@@ -197,6 +246,8 @@ export type PayrollRunStatus =
   | 'APPROVAL'
   | 'APPROVED'
   | 'PROCESSED'
+  | 'DISBURSED'
+  | 'NOT_STARTED'
   | 'FAILED';
 
 export interface PayrollRun {
@@ -332,4 +383,16 @@ export interface DashboardMetrics {
   criticalExceptionsCount: number;
   shiftEfficiency: string;
   shiftEfficiencyDelta: string;
+  totalEmployees?: number;
+  organizationsCount?: number;
+  departmentsCount?: number;
+  locationsCount?: number;
+  activeHeadcount?: number;
+  attendanceRate?: number;
+  missingPunchToday?: number;
+  onLeaveToday?: number;
+  monthlyPayrollDisbursed?: number;
+  payrollCycleStatus?: string;
+  pendingApprovals?: number;
+  criticalExceptions?: number;
 }

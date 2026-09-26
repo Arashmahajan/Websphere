@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.tsx';
+import { useOrganization } from '../../context/OrganizationContext.tsx';
 import { NotificationItem } from '../../types/index.ts';
 import { notificationApi } from '../../services/apiServices.ts';
 
@@ -9,6 +10,7 @@ interface TopHeaderProps {
   onOpenQuickAction: () => void;
   onSearchClick?: () => void;
   onOpenMobileMenu?: () => void;
+  onNavigateTab?: (tab: any) => void;
 }
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
@@ -16,14 +18,18 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   activeModuleName = 'Enterprise Workspace',
   onOpenQuickAction,
   onOpenMobileMenu,
+  onNavigateTab,
 }) => {
   const { currentUser, availableUsers, switchUser, logout } = useAuth();
+  const { currentOrganization, organizations, setCurrentOrganization } = useOrganization();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [orgDropdownOpen, setOrgDropdownOpen] = useState(false);
   const [notifDrawerOpen, setNotifDrawerOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const profileRef = useRef<HTMLDivElement>(null);
+  const orgRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,6 +43,9 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     function handleClickOutside(e: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileDropdownOpen(false);
+      }
+      if (orgRef.current && !orgRef.current.contains(e.target as Node)) {
+        setOrgDropdownOpen(false);
       }
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotifDrawerOpen(false);
@@ -113,15 +122,93 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             <span className="material-symbols-outlined text-base">add</span>
             <span className="hidden sm:inline">Quick Action</span>
           </button>
-          <div className="relative hidden lg:block">
+          <div className="relative hidden lg:block" ref={orgRef}>
             <button
+              onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
               className="flex items-center gap-1.5 h-9 px-3 bg-surface-container-low text-on-surface rounded-lg font-label-sm text-xs font-medium hover:bg-surface-container transition-colors cursor-pointer border border-slate-200/60"
               type="button"
             >
-              <span className="material-symbols-outlined text-base text-secondary">apartment</span>
-              <span>Acme Enterprise</span>
+              <span className="material-symbols-outlined text-base text-primary">corporate_fare</span>
+              <span className="font-semibold text-slate-800 max-w-[160px] truncate">
+                {currentOrganization ? currentOrganization.name : 'No Organization'}
+              </span>
+              {currentOrganization && (
+                <span className="px-1.5 py-0.2 bg-blue-100 text-blue-700 font-mono text-[10px] rounded font-bold">
+                  {currentOrganization.organizationCode}
+                </span>
+              )}
               <span className="material-symbols-outlined text-base text-secondary">arrow_drop_down</span>
             </button>
+
+            {orgDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-72 bg-surface-container-lowest rounded-xl shadow-xl border border-surface-container-high py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                <div className="px-3 py-1.5 border-b border-surface-container-low flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Organization Tenant
+                  </span>
+                  {onNavigateTab && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOrgDropdownOpen(false);
+                        onNavigateTab('organization');
+                      }}
+                      className="text-[11px] text-primary hover:underline font-semibold cursor-pointer"
+                    >
+                      Manage
+                    </button>
+                  )}
+                </div>
+
+                <div className="max-h-60 overflow-y-auto py-1">
+                  {organizations.length === 0 ? (
+                    <div className="px-3 py-3 text-center text-xs text-secondary">
+                      No organizations registered.
+                    </div>
+                  ) : (
+                    organizations.map((org) => (
+                      <button
+                        key={org.id}
+                        type="button"
+                        onClick={() => {
+                          setCurrentOrganization(org);
+                          setOrgDropdownOpen(false);
+                        }}
+                        className={`w-full px-3 py-2 text-left flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer ${
+                          currentOrganization?.id === org.id ? 'bg-primary-container/20 font-semibold' : ''
+                        }`}
+                      >
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs text-on-surface truncate">{org.name}</span>
+                          <span className="text-[10px] text-secondary font-mono">
+                            {org.organizationCode} · {org.country}
+                          </span>
+                        </div>
+                        {currentOrganization?.id === org.id && (
+                          <span className="material-symbols-outlined text-sm text-primary">check</span>
+                        )}
+                      </button>
+                    ))
+                  )}
+                </div>
+
+                {onNavigateTab && (
+                  <div className="px-2 pt-1 border-t border-surface-container-low mt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOrgDropdownOpen(false);
+                        onNavigateTab('organization');
+                      }}
+                      className="w-full py-1.5 px-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-xs font-semibold text-primary flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-sm">add_circle</span>
+                      <span>Organizations Directory</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -197,8 +284,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         <button
           className="p-space-xs rounded text-secondary hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer"
           type="button"
-          title="Enterprise Help & Docs"
-          onClick={() => alert('WorkSphere Documentation & API specs available in README.')}
+          title="Enterprise Help & Docs (See README.md)"
         >
           <span className="material-symbols-outlined text-xl">help_outline</span>
         </button>

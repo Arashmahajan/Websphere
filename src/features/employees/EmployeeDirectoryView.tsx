@@ -208,7 +208,7 @@ export const EmployeeDirectoryView: React.FC<EmployeeDirectoryViewProps> = ({
             <div className="h-5 w-px bg-on-surface-variant/40 ml-space-xs"></div>
             <div className="flex items-center gap-space-xs flex-wrap">
               <button
-                onClick={() => alert(`Direct Manager reassignment initialized for ${selectedIds.length} records.`)}
+                onClick={() => console.info(`Direct Manager reassignment initialized for ${selectedIds.length} records.`)}
                 className="flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container-high/20 hover:bg-surface-container-high/40 text-inverse-on-surface font-label-xs text-label-xs transition-colors cursor-pointer"
                 type="button"
               >
@@ -216,7 +216,7 @@ export const EmployeeDirectoryView: React.FC<EmployeeDirectoryViewProps> = ({
                 <span>Assign Direct Manager</span>
               </button>
               <button
-                onClick={() => alert(`Department Transfer workflow opened for ${selectedIds.length} personnel.`)}
+                onClick={() => console.info(`Department Transfer workflow opened for ${selectedIds.length} personnel.`)}
                 className="flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container-high/20 hover:bg-surface-container-high/40 text-inverse-on-surface font-label-xs text-label-xs transition-colors cursor-pointer"
                 type="button"
               >
@@ -638,27 +638,40 @@ export const EmployeeDirectoryView: React.FC<EmployeeDirectoryViewProps> = ({
                 {/* Empty State */}
                 {!isLoading && employees.length === 0 && (
                   <tr>
-                    <td colSpan={11} className="py-12 text-center">
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <span className="material-symbols-outlined text-4xl text-slate-300">
-                          person_search
-                        </span>
-                        <span className="font-semibold text-on-surface text-sm">No employees found.</span>
-                        {hasActiveFilters ? (
-                          <div className="flex flex-col items-center gap-2 mt-1">
+                    <td colSpan={11} className="py-16 text-center">
+                      <div className="flex flex-col items-center justify-center gap-3 max-w-sm mx-auto">
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                          <span className="material-symbols-outlined text-2xl">person_search</span>
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="font-bold text-on-surface text-base">No employees found</span>
+                          {hasActiveFilters ? (
                             <span className="text-secondary text-xs">
-                              Try adjusting your filters or search terms.
+                              No employees match your current filter criteria.
                             </span>
-                            <button
-                              type="button"
-                              onClick={clearFilters}
-                              className="px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface text-xs font-semibold hover:bg-slate-200 transition-colors cursor-pointer"
-                            >
-                              Clear Filters
-                            </button>
-                          </div>
+                          ) : (
+                            <span className="text-secondary text-xs">
+                              Create your first employee after configuring your organization.
+                            </span>
+                          )}
+                        </div>
+                        {hasActiveFilters ? (
+                          <button
+                            type="button"
+                            onClick={clearFilters}
+                            className="mt-2 px-4 py-2 rounded-xl bg-surface-container-high text-on-surface text-xs font-semibold hover:bg-slate-200 transition-colors cursor-pointer"
+                          >
+                            Clear Filters
+                          </button>
                         ) : (
-                          <span className="text-secondary text-xs">The employee register is currently empty.</span>
+                          <button
+                            type="button"
+                            onClick={onOpenAddModal}
+                            className="mt-2 inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-on-primary bg-primary hover:bg-primary/95 rounded-xl shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-sm">person_add</span>
+                            <span>Add Employee</span>
+                          </button>
                         )}
                       </div>
                     </td>
